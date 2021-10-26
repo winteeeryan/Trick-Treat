@@ -1,0 +1,116 @@
+//Digital Futures || OCAD University
+//Trick & Treat an interactive object by Winter Yan
+//arduinogetstarted.com/tutorials/arduino-light-sensor
+//Based on examples by Kate Hartman and Nick Puckett:
+//Blink multiple LEDs at different rates using timers & Servo Sweep Timer
+
+#include <Servo.h> 
+
+//Servo
+//Define Servo pins
+int servoPin = 9;
+
+//Servo object
+Servo servo; 
+
+//Move Rate and angles
+int moveRate = 100;        //the time between updates in milliseconds
+int minAngle = 90;     //sets the low point of the movement range
+int maxAngle = 180;   //sets the high point of the movement range
+int moveIncrement = 10;    // how much to move the motor each cycle
+int servoAngle;
+long lastTimeYouMoved;
+
+
+//LED
+//Define LED pins
+int ledPin1 = 2;
+int ledPin2 = 4;   
+//Define blinking rates
+int blinkRate1;
+int blinkRate2;
+//Define current states
+boolean ledState1 = false;
+boolean ledState2 = false;
+//Define stored time value
+long lastTimeYouBlinked1;
+long lastTimeYouBlinked2;
+//Sensor
+int sensorValue;
+int sensorPin = A0;
+                                            
+void setup() {
+  //servo
+  //attach servo to control pin
+  servo.attach (servoPin);
+  servoAngle=minAngle;
+  
+  //LED
+  pinMode(ledPin1, OUTPUT);
+  pinMode(ledPin2, OUTPUT);
+  
+  Serial.begin(9600);
+}
+
+void loop() {
+  //Read the analog input
+  sensorValue = analogRead(sensorPin);
+  //Print out the sensor value
+  Serial.print("Light sensor value: ");
+  Serial.println(sensorValue);
+  delay(1);
+  int servoPosition=servo.read();
+  //Print out the servo position
+  Serial.print("Servo position: ");
+  Serial.println(servoPosition);
+
+  if (sensorValue<30){
+    blinkRate1=300;
+    blinkRate2=300;
+    
+    //Servo
+    
+  if(millis()-lastTimeYouMoved>=moveRate) 
+{                                         
+  servo.write(servoAngle);
+  
+  servoAngle += moveIncrement;
+
+  if (servoAngle <= minAngle || servoAngle >= maxAngle) 
+  {
+   moveIncrement = -moveIncrement;
+   }
+
+   lastTimeYouMoved = millis();
+}
+    
+  } else if (sensorValue>150){
+    blinkRate1=3000; 
+    blinkRate2=3000; 
+  
+  } else {
+    blinkRate1=200;
+    //delay(600);
+    blinkRate2=100;
+    //delay(600);
+  }
+  
+//LED1
+if(millis()-lastTimeYouBlinked1>=blinkRate1)
+{
+ledState1 = !ledState1; 
+lastTimeYouBlinked1 = millis();
+}
+
+//LED2
+  if(millis()-lastTimeYouBlinked2>=blinkRate2)
+{
+  ledState2 = !ledState2;
+  lastTimeYouBlinked2 = millis();
+}
+
+  digitalWrite(ledPin1,ledState1); 
+  digitalWrite(ledPin2,ledState2);
+
+
+}
